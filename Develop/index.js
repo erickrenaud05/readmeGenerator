@@ -33,18 +33,32 @@ inquirer
         choices: ['Table of contents', 'Installation', 'Collaboration', 'Test', 'Credits']
     })
     .then((answer) => {
+        let tableOfContents = false;
         for (let extra of answer.extras) {
-            const newQuestion = new Questions('input', `${extra}: `, extra);            
-            questions.push(newQuestion);
+            if(extra !== 'Table of contents') {
+                const newQuestion = new Questions('input', `${extra}: `, extra);            
+                questions.push(newQuestion);
+            } else {
+                tableOfContents = true;
+            }
         }
     inquirer
         .prompt(questions)
         .then((answer) => {
             const fileName = 'readme.md';
-    
+            '[text](#name)'
             var fileContent = `# ${answer.title}\n\n`;
             var x = 0;
             for (let answers in answer) {
+                if(tableOfContents && x === 2) {
+                    fileContent += `## Table of content\n`;
+                    for (let question in questions) {
+                        if(question > 1) {
+                            fileContent += `[${questions[question].name}](#${questions[question].name})\n`;
+                        }
+                    }
+                    fileContent += '\n';
+                }
                 if(answer[answers] === '') {
                     answer[answers] = 'N/A';
                 }
@@ -54,14 +68,6 @@ inquirer
                 x++
             }
             
-            // const fileContent = `# ${answer.title}\n\n` +
-            //                     `## Description\n${answer.description}\n\n` +
-            //                     `## Installation\n${answer.Installation}\n\n` +
-            //                     `## Usage\n${answer.usage}\n\n` +
-            //                     `## Credits\n${answer.Credits}\n\n` +
-            //                     `## How to contribute\n${answer.Collaboration}\n\n`+
-            //                     `## Tests\n${answer.Test}`
-    
             fs.writeFile(fileName, fileContent);
         })
     })
