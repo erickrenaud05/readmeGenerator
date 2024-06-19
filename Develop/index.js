@@ -11,8 +11,8 @@ class Questions {
 }
 
 const titleQuestion = new Questions('input', 'Project title: ', 'title');
-const descriptionQuestion = new Questions('input', 'Description: ', 'description');
-const usageQuestion = new Questions('input', 'Usage information: ', 'usage');
+const descriptionQuestion = new Questions('input', 'Description: ', 'Description');
+const usageQuestion = new Questions('input', 'Usage information: ', 'Usage');
 // const installationQuestion = new Questions('input', 'Installation: ', 'installation');
 
 const questions = [titleQuestion, descriptionQuestion, usageQuestion];
@@ -46,7 +46,6 @@ inquirer
         .prompt(questions)
         .then((answer) => {
             const fileName = 'readme.md';
-            '[text](#name)'
             var fileContent = `# ${answer.title}\n\n`;
             var x = 0;
             for (let answers in answer) {
@@ -54,7 +53,7 @@ inquirer
                     fileContent += `## Table of content\n`;
                     for (let question in questions) {
                         if(question > 1) {
-                            fileContent += `[${questions[question].name}](#${questions[question].name})\n`;
+                            fileContent += `[${questions[question].name}](#${questions[question].name})\\\n`;
                         }
                     }
                     fileContent += '\n';
@@ -67,8 +66,21 @@ inquirer
                 }
                 x++
             }
+            inquirer
+            .prompt({
+                type: 'list',
+                message: 'Please select your license',
+                name: 'license',
+                choices: ['N/A', 'MIT', 'MPL_2.0', 'ISC']
+            })
+            .then((answer) => {
+                if(answer.license !== 'N/A') {
+                    fileContent += `## License\nPlease refer to license in repo or badge area\n\n`;
+                    fileContent += `## Badges\n![${answer.license}](https://img.shields.io/badge/license-${answer.license}-blue)`;
+                }
+                fs.writeFile(fileName, fileContent);
+            })
             
-            fs.writeFile(fileName, fileContent);
         })
     })
 }
