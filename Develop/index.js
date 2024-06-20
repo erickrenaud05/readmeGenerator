@@ -3,19 +3,26 @@ const fs = require('fs').promises
 const inquirer = require('inquirer');
 // TODO: Create an array of questions for user input
 class Questions {
-    constructor(type, message, name){
+    constructor(type, message, name, choices){
         this.type = type;
         this.message = message;
         this.name = name;
+
+        if(choices){
+            this.choices = choices
+        }
     }
 }
 
 const titleQuestion = new Questions('input', 'Project title: ', 'title');
 const descriptionQuestion = new Questions('input', 'Description: ', 'Description');
 const usageQuestion = new Questions('input', 'Usage information: ', 'Usage');
+const licenseQuestion = new Questions('list', 'Please select your license', 'license', ['N/A', 'MIT', 'MPL_2.0', 'ISC'])
+const githubUsernameQuestion = new Questions('input', 'Please enter github username', 'username');
+const emailAddressQuestion = new Questions('input', 'Please enter email address', 'email');
 // const installationQuestion = new Questions('input', 'Installation: ', 'installation');
 
-const questions = [titleQuestion, descriptionQuestion, usageQuestion];
+const questions = [githubUsernameQuestion, emailAddressQuestion, titleQuestion, descriptionQuestion, usageQuestion, licenseQuestion];
 
 // TODO: Create a function to write README file
 function writeToFile(fileName, data) {
@@ -47,40 +54,44 @@ inquirer
         .then((answer) => {
             const fileName = 'readme.md';
             var fileContent = `# ${answer.title}\n\n`;
+            var questionsSection = false;
             var x = 0;
             for (let answers in answer) {
                 if(tableOfContents && x === 2) {
                     fileContent += `## Table of content\n`;
                     for (let question in questions) {
-                        if(question > 1) {
-                            fileContent += `[${questions[question].name}](#${questions[question].name})\\\n`;
+                        if(question > 2) {
+                            fileContent += `[${questions[question].name}](#${questions[question].name.toLowerCase()})\\\n`;
                         }
                     }
-                    fileContent += '\n';
+                    if(answer.username !== 'N/A' && !questionsSection || answer.email !== 'N/A' && !questionsSection){
+                        fileContent += `[Questions](#questions)`
+                        questionsSection = true;
+                    }
+                    fileContent += '\n\n';
                 }
                 if(answer[answers] === '') {
                     answer[answers] = 'N/A';
                 }
-                if(x > 0) {
+                if(x > 0 && answers !== 'license' && answers !== 'username' && answers !== 'email') {
                     fileContent += `## ${answers}\n${answer[answers]}\n\n`;
                 }
                 x++
             }
-            inquirer
-            .prompt({
-                type: 'list',
-                message: 'Please select your license',
-                name: 'license',
-                choices: ['N/A', 'MIT', 'MPL_2.0', 'ISC']
-            })
-            .then((answer) => {
-                if(answer.license !== 'N/A') {
-                    fileContent += `## License\nPlease refer to license in repo or badge area\n\n`;
-                    fileContent += `## Badges\n![${answer.license}](https://img.shields.io/badge/license-${answer.license}-blue)`;
-                }
-                fs.writeFile(fileName, fileContent);
-            })
-            
+            if(answer.license !== 'N/A') {
+                fileContent += `## License\nPlease refer to license in repo or badge area\n\n`;
+                fileContent += `## Badges\n![${answer.license}](https://img.shields.io/badge/license-${answer.license}-blue)\n\n`;
+            }
+
+            if(answer.username !== 'N/A' && answer.email !== 'N/A'){
+                fileContent += `## Questions\nIf you have any questions, email me at ${answer.email}, or visit my github page at https://github.com/${answer.username}\n\n`;
+            } else if(answer.username === 'N/A' && answer.email !== 'N/A') {
+                fileContent += `## Questions\nIf you have any questions, email me at ${answer.email}.`;
+            } else if(answer.username !== 'N/A' && answer.email === 'N/A'){
+                fileContent += `## Questions\nIf you have any questions, visit my github at https://github.com/${answer.username}.`;
+            }
+
+            fs.writeFile(fileName, fileContent);
         })
     })
 }
