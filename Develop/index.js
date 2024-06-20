@@ -52,10 +52,10 @@ inquirer
     inquirer
         .prompt(questions)
         .then((answer) => {
-            const fileName = 'readme.md';
+            const fileName = 'README.md';
             var fileContent = `# ${answer.title}\n\n`;
             var questionsSection = false;
-            var x = 0;
+            var x = 0
             for (let answers in answer) {
                 if(tableOfContents && x === 2) {
                     fileContent += `## Table of content\n`;
@@ -73,7 +73,7 @@ inquirer
                 if(answer[answers] === '') {
                     answer[answers] = 'N/A';
                 }
-                if(x > 0 && answers !== 'license' && answers !== 'username' && answers !== 'email') {
+                if(answers !== 'title' && answers !== 'license' && answers !== 'username' && answers !== 'email') {
                     fileContent += `## ${answers}\n${answer[answers]}\n\n`;
                 }
                 x++
