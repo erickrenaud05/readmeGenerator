@@ -52,7 +52,7 @@ inquirer
     inquirer
         .prompt(questions)
         .then((answer) => {
-            const fileName = 'README.md';
+            const fileName = 'yourReadMe/README.md';
             var fileContent = `# ${answer.title}\n\n`;
             var questionsSection = false;
             var x = 0
